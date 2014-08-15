@@ -1,68 +1,101 @@
+// A C++ program to check if two given line segments intersect
 #include <iostream>
 #include <cstdio>
-#include <cmath>
-
 using namespace std;
+ 
+struct Point
+{
+    int x;
+    int y;
+};
+ 
+// Given three colinear points p, q, r, the function checks if
+// point q lies on line segment 'pr'
+bool onSegment(Point p, Point q, Point r)
+{
+    if (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) &&
+        q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y))
+       return true;
+ 
+    return false;
+}
+ 
+// To find orientation of ordered triplet (p, q, r).
+// The function returns following values
+// 0 --> p, q and r are colinear
+// 1 --> Clockwise
+// 2 --> Counterclockwise
+int orientation(Point p, Point q, Point r)
+{
+    // See 10th slides from following link for derivation of the formula
+    // http://www.dcs.gla.ac.uk/~pat/52233/slides/Geometry1x1.pdf
+    int val = (q.y - p.y) * (r.x - q.x) -
+              (q.x - p.x) * (r.y - q.y);
+ 
+    if (val == 0) return 0;  // colinear
+ 
+    return (val > 0)? 1: 2; // clock or counterclock wise
+}
+ 
+// The main function that returns true if line segment 'p1q1'
+// and 'p2q2' intersect.
+bool doIntersect(Point p1, Point q1, Point p2, Point q2)
+{
+    // Find the four orientations needed for general and
+    // special cases
+    int o1 = orientation(p1, q1, p2);
+    int o2 = orientation(p1, q1, q2);
+    int o3 = orientation(p2, q2, p1);
+    int o4 = orientation(p2, q2, q1);
+ 
+    // General case
+    if (o1 != o2 && o3 != o4)
+        return true;
+ 
+    // Special Cases
+    // p1, q1 and p2 are colinear and p2 lies on segment p1q1
+    if (o1 == 0 && onSegment(p1, p2, q1)) return true;
+ 
+    // p1, q1 and p2 are colinear and q2 lies on segment p1q1
+    if (o2 == 0 && onSegment(p1, q2, q1)) return true;
+ 
+    // p2, q2 and p1 are colinear and p1 lies on segment p2q2
+    if (o3 == 0 && onSegment(p2, p1, q2)) return true;
+ 
+     // p2, q2 and q1 are colinear and q1 lies on segment p2q2
+    if (o4 == 0 && onSegment(p2, q1, q2)) return true;
+ 
+    return false; // Doesn't fall in any of the above cases
+}
+ 
+// Driver program to test above functions
+int main()
+{   
+    int t;
+    scanf("%d",&t);
+    struct Point Zero = {0, 0};
 
-int main () {
-
-  int t;
-  scanf("%d",&t);
-
-  while (t--) {
-    int x1, y1, x2, y2, xm, ym;
-    scanf("%d %d %d %d %d %d",&x1, &y1, &x2, &y2, &xm, &ym);
-    
-    double slope_mirror, val1, val2;
-    if (xm != 0) {
-      slope_mirror = ym/xm;
-      val1 = y1 - slope_mirror*x1;
-      val2 = y2 - slope_mirror*x2;
+    while (t--) {
+        int x1, y1, x2, y2, xm, ym;
+        scanf("%d %d %d %d %d %d",&x1, &y1, &x2, &y2, &xm, &ym);
+        struct Point p1 = {x1, y1};
+        struct Point q1 = {x2, y2};
+        struct Point pm = {xm, ym};
+          
+        if (p1.x == 0 && p1.y == 0) {
+            if (orientation(p1, q1, pm)==0 && (onSegment(p1, pm, q1) || onSegment(p1, q1, pm))) 
+              printf("NO\n");
+            else printf("YES\n");
+        }
+        else if (q1.x == 0 && q1.y == 0) {
+            if (orientation(p1, q1, pm)==0 && (onSegment(p1, pm, q1) || onSegment(q1, p1, pm))) 
+              printf("NO\n");
+            else printf("YES\n");
+        }
+        else {
+          if (doIntersect(p1, q1, Zero, pm)) 
+            printf("NO\n");
+          else printf("YES\n");
+        }
     }
-    else {
-      val1 = x1;
-      val2 = x2;
-    }
-    double slope_wall, valm, origin;
-    if ((x2 - x1) != 0) {
-      slope_wall = (y2-y1)/(x2-x1);
-      valm = ym - slope_wall*xm - y1 + x1*slope_wall;
-      origin = - y1 + x1*slope_wall;
-    }
-    else {
-      valm = xm + x1;
-      origin = x1;
-    }
-    
-    double pro1 = valm*origin;
-    double pro2 = val1*val2;
-    // printf("%lf %lf %lf\n",valm,origin,pro1);
-    if (pro1 < 0 && pro2 < 0) {
-      printf("NO\n");
-    }
-    // else if ((val1 == 0 && val2 != 0) || (val1 != 0 && val2 == 0)) {
-    //     printf("NO\n"); 
-    // }
-    else if (val1 == 0 ) {
-      double point1_origin = sqrt(y1*y1 + x1*x1);
-      double origin_mirror = sqrt(ym*ym + xm*xm);
-      double point1_mirror = sqrt((ym-y1)*(ym-y1) + (xm-x1)*(xm-x1));
-      if (point1_origin > origin_mirror || point1_mirror > origin_mirror) {
-        printf("YES\n");
-      }
-      else printf("NO\n");
-    }
-    else if (val2 == 0) {
-      double point1_origin = sqrt(y2*y2 + x2*x2);
-      double origin_mirror = sqrt(ym*ym + xm*xm);
-      double point1_mirror = sqrt((ym-y2)*(ym-y2) + (xm-x2)*(xm-x2));
-      if (point1_origin > origin_mirror || point1_mirror > origin_mirror) {
-        printf("YES\n");
-      }
-      else printf("NO\n");
-    }
-    else {
-      printf("YES\n");
-    }
-  }
 }

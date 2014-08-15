@@ -69,18 +69,19 @@ bool doIntersect(Point p1, Point q1, Point p2, Point q2)
  
 // Driver program to test above functions
 int main()
-{   
-    int t;
-    scanf("%d",&t);
-    struct Point Zero = {0, 0};
-
-    while (t--) {
-        int x1, y1, x2, y2, xm, ym;
-        scanf("%d %d %d %d %d %d",&x1, &y1, &x2, &y2, &xm, &ym);
-        struct Point p1 = {x1, y1};
-        struct Point q1 = {x2, y2};
-        struct Point pm = {xm, ym};
-        doIntersect(p1, q1, Zero, pm)? printf("NO\n");:printf("YES\n");
-    }
+{
+    struct Point p1 = {1, 1}, q1 = {10, 1};
+    struct Point p2 = {0, 0}, q2 = {10, 2};
+ 
+    doIntersect(p1, q1, p2, q2)? cout << "Yes\n": cout << "No\n";
+ 
+    p1 = {10, 0}, q1 = {0, 10};
+    p2 = {0, 0}, q2 = {10, 10};
+    doIntersect(p1, q1, p2, q2)? cout << "Yes\n": cout << "No\n";
+ 
+    p1 = {-5, -5}, q1 = {0, 0};
+    p2 = {1, 1}, q2 = {10, 10};
+    doIntersect(p1, q1, p2, q2)? cout << "Yes\n": cout << "No\n";
+ 
     return 0;
 }
