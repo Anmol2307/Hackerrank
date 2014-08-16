@@ -1,6 +1,7 @@
 // A C++ program to check if two given line segments intersect
 #include <iostream>
 #include <cstdio>
+#include <cstdlib>
 using namespace std;
  
 struct Point
@@ -29,8 +30,9 @@ int orientation(Point p, Point q, Point r)
 {
     // See 10th slides from following link for derivation of the formula
     // http://www.dcs.gla.ac.uk/~pat/52233/slides/Geometry1x1.pdf
-    int val = (q.y - p.y) * (r.x - q.x) -
-              (q.x - p.x) * (r.y - q.y);
+    long long int first = (long long int)((long long int)(q.y - p.y) * (long long int)(r.x - q.x));
+    long long int second = (long long int)((long long int)(q.x - p.x) * (long long int)(r.y - q.y));
+    long long int val =  (long long int)(first - second);
  
     if (val == 0) return 0;  // colinear
  
@@ -82,20 +84,20 @@ int main()
         struct Point q1 = {x2, y2};
         struct Point pm = {xm, ym};
           
-        if (p1.x == 0 && p1.y == 0) {
-            if (orientation(p1, q1, pm)==0 && (onSegment(p1, pm, q1) || onSegment(p1, q1, pm))) 
-              printf("NO\n");
-            else printf("YES\n");
-        }
-        else if (q1.x == 0 && q1.y == 0) {
-            if (orientation(p1, q1, pm)==0 && (onSegment(p1, pm, q1) || onSegment(q1, p1, pm))) 
-              printf("NO\n");
-            else printf("YES\n");
-        }
-        else {
-          if (doIntersect(p1, q1, Zero, pm)) 
+        // if (p1.x == 0 && p1.y == 0) {
+        //     if (orientation(p1, q1, pm)==0 && (onSegment(p1, pm, q1) || onSegment(p1, q1, pm))) 
+        //       printf("NO\n");
+        //     else printf("YES\n");
+        // }
+        // else if (q1.x == 0 && q1.y == 0) {
+        //     if (orientation(p1, q1, pm)==0 && (onSegment(p1, pm, q1) || onSegment(q1, p1, pm))) 
+        //       printf("NO\n");
+        //     else printf("YES\n");
+        // }
+        // else {
+          if (doIntersect(Zero, pm, p1, q1)) 
             printf("NO\n");
           else printf("YES\n");
-        }
+        // }
     }
 }
