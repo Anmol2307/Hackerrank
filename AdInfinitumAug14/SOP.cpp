@@ -1,111 +1,92 @@
-#include <cmath>
-#include <ctime>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <cstdio>
-#include <sstream>
-#include <algorithm>
-#include <cstdlib>
-#include <cstring>
-#include <map>
-#include <set>
-#include <queue>
-#include <cctype>
-#include <list>
-#include <stack>
-#include <fstream>
-#include <utility>
-#include <iomanip>
-#include <climits>
-
+#include<iostream>
+#include<vector>
+#include<cmath>
+#include<complex>
 using namespace std;
-#define pb push_back
-#define all(s) s.begin(),s.end()
-#define f(i,a,b) for(int i=a;i<b;i++)
-#define F(i,a,b) for(int i=a;i>=b;i--)
-#define PI 3.1415926535897932384626433832795
-#define BIG_INF 7000000000000000000LL
-#define mp make_pair
-#define eps 1e-9
-#define si(n) scanf("%d",&n)
-#define sll(n) scanf("%lld",&n)
-#define mod 100003
-#define mm 10000000
-#define INF (1<<29)
-#define SET(a) memset(a,-1,sizeof(a))
-#define CLR(a) memset(a,0,sizeof(a))
-#define FILL(a,v) memset(a,v,sizeof(a))
-#define EPS 1e-9
-#define min3(a,b,c) min(a,min(b,c))
-#define max3(a,b,c) max(a,max(b,c))
-#define READ freopen("input.txt", "r", stdin)
-#define WRITE freopen("output.txt", "w", stdout)
-
-
-typedef long long int LL;
-
-string inttostring(int n)
+#define PB push_back
+const double PI = 4*atan(1);
+typedef complex<double> base;
+vector<base> omega;
+long long FFT_N,mod=100003;
+void init_fft(long long n)
 {
-  stringstream a;
-  a<<n;
-  string A;
-  a>>A;
-  return A;
+  FFT_N  = n;
+  omega.resize(n);
+  double angle = 2 * PI / n;
+  for(int i = 0; i < n; i++)
+    omega[i] = base( cos(i * angle), sin(i * angle));
 }
-
-int stringtoint(string A)
+void fft (vector<base> & a)
 {
-  stringstream a;
-  a<<A;
-  int p;
-  a>>p;
-  return p;
-}
-
-inline void inp(int &n ) {//fast input function
-    n=0;
-    int ch=getchar(),sign=1;
-    while( ch < '0' || ch > '9' ){if(ch=='-')sign=-1; ch=getchar();}
-    while( ch >= '0' && ch <= '9' )
-        n=(n<<3)+(n<<1)+ ch-'0', ch=getchar();
-    n=n*sign;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-
-int main () {
-  int n;
-  inp(n);
-  int arr[n];
-  for (int i = 0; i < n; i++) {
-    inp(arr[i]);
-  }
-  int q;
-  inp(q);
-
-  for (int i = 0; i < q; i++) {
-    int x;
-    inp(x);
-
-    int a1[n];
-    memset(a1,0,sizeof(a1));
-    a1[0] = 1;
-    a1[1] = arr[n-1];
-    int b1[n];
-    b1[0] = 1;
-    for (int j = n-2; j >= 0; j--) {
-      // printf("Iteration %d\n",j);
-      for (int i = 1; i < n; i++) {
-        b1[i] = (a1[i]%mod + ((long long int)(arr[j]*a1[i-1]))%mod)%mod;
-        // printf("HERE %d %d %d\n",a1[i],arr[n-i],a1[i-1]);
-        // printf("%d\n",b1[i]);
-      }
-      for (int i = 1; i < n; i++) {
-        a1[i] = b1[i];
-      }
+  long long n = (long long) a.size();
+  if (n == 1)  return;
+  long long half = n >> 1;
+  vector<base> even (half),  odd (half);
+  for (int i=0, j=0; i<n; i+=2, ++j)
+    {
+      even[j] = a[i];
+      odd[j] = a[i+1];
     }
-    printf("%d\n",a1[x]);
-  }
+  fft (even), fft (odd);
+  for (int i=0, fact = FFT_N/n; i < half; ++i)
+    {
+      base twiddle =  odd[i] * omega[i * fact] ;
+      a[i] =  even[i] + twiddle;
+      a[i+half] = even[i] - twiddle;
+    }
+}
+void multiply (const vector<long long> & a, const vector<long long> & b, vector<long long> & res)
+{
+  vector<base> fa (a.begin(), a.end()),  fb (b.begin(), b.end());
+  long long n = 1;
+  while (n < 2*max (a.size(), b.size()))  n <<= 1;
+  fa.resize (n),  fb.resize (n);
 
+  init_fft(n);
+  fft (fa),  fft (fb);
+  for (size_t i=0; i<n; ++i)
+    fa[i] = conj( fa[i] * fb[i]);
+  fft (fa);
+  res.resize (n);
+  for (size_t i=0; i<n; ++i)
+    {
+      res[i] = (long long) (fa[i].real() / n + 0.5);
+      res[i]%=mod;
+    }
+}
+int main()
+{
+  int t,n,i,p,l,k,q;
+  long long x;
+  vector<long long> inp,res;
+  vector<vector<long long> > calc[20];
+  cin>>n;
+  p=0;l=n;
+  for(i=0;i<n;i++)
+    {
+      inp.clear();
+      cin>>x;
+      inp.PB(1);
+      inp.PB(x);
+      calc[0].PB(inp);
+    }
+  while(l>1)
+    {
+      p++;
+      for(i=0;i<l/2;i++)
+        {
+          calc[p].PB(res);
+          multiply(calc[p-1][2*i],calc[p-1][2*i+1],calc[p][i]);
+        }
+      if(l%2)
+        calc[p].PB(calc[p-1][l-1]);
+      l=calc[p].size();
+    }
+  cin>>q;
+  while(q--)
+    {
+      cin>>k;
+      cout<<calc[p][0][k]<<endl;
+    }
+  return 0;
 }
