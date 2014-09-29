@@ -10,8 +10,8 @@
       n=n*sign;
   }
 
-  typedef pair<int,int> pii;
-
+typedef pair<int,int> pii;
+typedef long long int lli;
 
 int main () {
   int n;
@@ -19,18 +19,33 @@ int main () {
 
   map <int, int> m;
   stack<int> stk;
-  int ans = 0;
-
+  lli ans = 0;
   for (int i = 0; i < n; i++) {
     int x; inp(x);
-    if (m.find(x) != m.end() && stk.top() > x) {
-      stk.push(x);
+    if (m.find(x) != m.end() && !stk.empty() && stk.top() <= x) {
+      while (!stk.empty() && stk.top() < x) {
+        m.erase(stk.top());
+        stk.pop();
+      }
+      ans += (lli)m[x];
       m[x]++;
     }
-    else if (m.find(x) != m.end() && stk.top() < x) {
-      
+    else if (m.find(x) == m.end() && !stk.empty() && stk.top() < x){
+      while (!stk.empty() && stk.top() < x) {
+        m.erase(stk.top());
+        stk.pop();
+      }
+      m[x] = 1;
+      stk.push(x);
+    }
+    else if (m.find(x) == m.end() && !stk.empty() && stk.top() > x) {
+      stk.push(x);
+      m[x] = 1;
+    }
+    else if (stk.empty()){
+      stk.push(x);
+      m[x] = 1;
     }
   }
-
-  printf("%d\n",ans*2);
+  printf("%lli\n",ans*2);
 }
